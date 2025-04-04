@@ -2,7 +2,7 @@ import styled from 'styled-components'
 
 interface IProps {}
 
-export default function TemplateComponent(props: IProps) {
+export default function Intersection(props: IProps) {
   return <Container></Container>
 }
 
