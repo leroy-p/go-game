@@ -1,62 +1,195 @@
 import styled from 'styled-components'
 
-import { BOARD_SIZE } from '../hooks/use-game'
-import { StoneColor, useBoard } from '../hooks/use-board'
-import { useState } from 'react'
+import { BOARD_SIZE, StoneColor } from '../hooks/use-game'
+import { useBoard } from '../hooks/use-board'
+import { intToAlpha } from '../utils/utils'
 
 interface IProps {
   board: ReturnType<typeof useBoard>
+  playingColor: StoneColor
+  lastPlayedIndex: number
+  setPlayingColor: (value: StoneColor) => void
+  setLastPlayedIndex: (value: number) => void
 }
 
-export default function Board({ board }: IProps) {
-  const [color, setColor] = useState<StoneColor>(StoneColor.BLACK)
-
+export default function Board({ board, playingColor, lastPlayedIndex, setPlayingColor, setLastPlayedIndex }: IProps) {
   if (BOARD_SIZE <= 0) return <></>
 
   function onIntersectionClick(index: number) {
-    if (board.intersections[index]?.stone) return
+    if (board.intersections[index]?.stone || board.intersections[index]?.ko) return
 
-    board.addStone(index, color)
-    setColor(color === StoneColor.BLACK ? StoneColor.WHITE : StoneColor.BLACK)
+    board.addStone(index, playingColor)
+    setPlayingColor(playingColor === StoneColor.BLACK ? StoneColor.WHITE : StoneColor.BLACK)
+    setLastPlayedIndex(index)
   }
 
   return (
     <Container>
-      {board.intersections.map((intersection, index) => (
-        <IntersectionContainer
-          empty={Boolean(intersection.stone)}
-          index={index}
-          key={index}
-          onClick={() => onIntersectionClick(index)}
-        >
-          <div className="vertical" />
-          <div className="horizontal" />
-          {intersection.stone && <Stone color={intersection.stone} />}
-        </IntersectionContainer>
-      ))}
+      <div className="main-container">
+        {board.intersections.map((intersection, index) => (
+          <IntersectionContainer
+            index={index}
+            key={index}
+            onClick={() => onIntersectionClick(index)}
+            unclickable={Boolean(intersection.stone || intersection.ko)}
+          >
+            <div className="vertical-line" />
+            <div className="horizontal-line" />
+            {intersection.hoshi && <div className="hoshi" />}
+            {intersection.ko && (
+              <div className="ko">
+                <div />
+              </div>
+            )}
+            {intersection.stone && (
+              <Stone className="stone" color={intersection.stone}>
+                {index === lastPlayedIndex && <div />}
+              </Stone>
+            )}
+            {!intersection.stone && !intersection.ko && <PreviewStone className="preview-stone" color={playingColor} />}
+          </IntersectionContainer>
+        ))}
+      </div>
+      <div className="x-container top">
+        {Array.from({ length: BOARD_SIZE }).map((_, index) => (
+          <div>
+            <p>{intToAlpha(index)}</p>
+          </div>
+        ))}
+      </div>
+      <div className="x-container bottom">
+        {Array.from({ length: BOARD_SIZE }).map((_, index) => (
+          <div>
+            <p>{intToAlpha(index)}</p>
+          </div>
+        ))}
+      </div>
+      <div className="y-container left">
+        {Array.from({ length: BOARD_SIZE }).map((_, index) => (
+          <div>
+            <p>{BOARD_SIZE - index}</p>
+          </div>
+        ))}
+      </div>
+      <div className="y-container right">
+        {Array.from({ length: BOARD_SIZE }).map((_, index) => (
+          <div>
+            <p>{BOARD_SIZE - index}</p>
+          </div>
+        ))}
+      </div>
     </Container>
   )
 }
 
 const Container = styled.div`
-  align-items: center;
+  background-color: #946500;
   display: flex;
-  flex-direction: row;
-  flex-wrap: wrap-reverse;
-  height: 800px;
-  justify-content: center;
-  width: 800px;
+  height: 848px;
+  padding: 16px;
+  position: relative;
+  width: 848px;
+
+  .main-container {
+    align-items: center;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap-reverse;
+    height: 100%;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .x-container {
+    display: flex;
+    flex-direction: row;
+    height: 32px;
+    justify-content: center;
+    left: 0;
+    padding: 0 16px;
+    position: absolute;
+    width: 100%;
+
+    &.top {
+      align-items: flex-start;
+      top: 4px;
+    }
+
+    &.bottom {
+      align-items: flex-end;
+      bottom: 4px;
+    }
+
+    & > div {
+      align-items: center;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      justify-content: center;
+
+      & > p {
+        color: #000000;
+        font-size: 18px;
+        font-weight: bold;
+      }
+    }
+  }
+
+  .y-container {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    justify-content: center;
+    position: absolute;
+    top: 0;
+    padding: 16px 0;
+    width: 32px;
+
+    &.left {
+      align-items: flex-start;
+      left: 4px;
+    }
+
+    &.right {
+      align-items: flex-end;
+      right: 4px;
+    }
+
+    & > div {
+      align-items: center;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      justify-content: center;
+
+      & > p {
+        color: #000000;
+        font-size: 18px;
+        font-weight: bold;
+      }
+    }
+  }
 `
 
-const IntersectionContainer = styled.div<{ index: number; empty: boolean }>`
-  background-color: #946500;
-  cursor: ${({ empty }) => (empty ? 'auto' : 'pointer')};
+const IntersectionContainer = styled.div<{ index: number; unclickable: boolean }>`
+  align-items: center;
+  cursor: ${({ unclickable }) => (unclickable ? 'auto' : 'pointer')};
+  display: flex;
+  flex-direction: row;
   height: calc(100% / ${BOARD_SIZE});
+  justify-content: center;
   padding: 1px;
   position: relative;
   width: calc(100% / ${BOARD_SIZE});
 
-  .vertical {
+  &:hover {
+    .preview-stone {
+      display: flex;
+    }
+  }
+
+  .vertical-line {
     background-color: #000000;
     height: ${({ index }) => (index < BOARD_SIZE || index >= BOARD_SIZE * BOARD_SIZE - BOARD_SIZE ? '50%' : '100%')};
     left: calc(50% - 1px);
@@ -65,7 +198,7 @@ const IntersectionContainer = styled.div<{ index: number; empty: boolean }>`
     width: 2px;
   }
 
-  .horizontal {
+  .horizontal-line {
     background-color: #000000;
     height: 2px;
     left: ${({ index }) => (index % BOARD_SIZE === 0 ? '50%' : '0')};
@@ -73,13 +206,60 @@ const IntersectionContainer = styled.div<{ index: number; empty: boolean }>`
     top: calc(50% - 1px);
     width: ${({ index }) => (index % BOARD_SIZE === 0 || index % BOARD_SIZE === BOARD_SIZE - 1 ? '50%' : '100%')};
   }
+
+  .hoshi {
+    background-color: #000000;
+    border-radius: 50%;
+    height: 20%;
+    width: 20%;
+  }
+
+  .ko {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    justify-content: center;
+    left: 0;
+    position: absolute;
+    top: 0;
+    width: 100%;
+
+    & > div {
+      border: solid 2px #000000;
+      height: 60%;
+      width: 60%;
+    }
+  }
 `
 
 const Stone = styled.div<{ color: StoneColor }>`
+  align-items: center;
   background-color: ${({ color }) => (color === StoneColor.BLACK ? '#000000' : '#ffffff')};
   border-radius: 50%;
+  display: flex;
+  flex-direction: row;
+  height: calc(100% - 4px);
+  justify-content: center;
+  left: 2px;
+  position: absolute;
+  top: 2px;
+  width: calc(100% - 4px);
+
+  & > div {
+    background-color: ${({ color }) => (color === StoneColor.BLACK ? '#ffffff' : '#000000')};
+    height: 20%;
+    width: 20%;
+  }
+`
+
+const PreviewStone = styled.div<{ color: StoneColor }>`
+  background-color: ${({ color }) => (color === StoneColor.BLACK ? '#000000' : '#ffffff')};
+  border-radius: 50%;
+  display: none;
   height: calc(100% - 4px);
   left: 2px;
+  opacity: 0.5;
   position: absolute;
   top: 2px;
   width: calc(100% - 4px);

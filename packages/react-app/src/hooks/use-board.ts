@@ -1,20 +1,38 @@
 import { useState } from 'react'
 
-export enum StoneColor {
-  BLACK = 'BLACK',
-  WHITE = 'WHITE',
-}
+import { StoneColor } from './use-game'
 
 export interface IIntersection {
   stone?: StoneColor
+  hoshi?: boolean
+  ko?: boolean
 }
 
 export function useBoard(size: number) {
   const [intersections, setIntersections] = useState<IIntersection[]>(() => {
-    const result = []
+    const hoshiGap = size < 10 ? 2 : 3
+    const result: IIntersection[] = []
 
     for (let i = 0; i < size * size; i++) {
-      result.push({})
+      const x = i % size
+      const y = Math.floor(i / size)
+      const intersection: IIntersection = {}
+
+      if (
+        (x === hoshiGap && y === hoshiGap) || // bottom left
+        (x === size - hoshiGap - 1 && y === hoshiGap) || // bottom left
+        (x === hoshiGap && y === size - hoshiGap - 1) || // top left
+        (x === size - hoshiGap - 1 && y === size - hoshiGap - 1) || // top right
+        (size % 2 === 1 && x === hoshiGap && y === Math.floor(size / 2)) || // middle left
+        (size % 2 === 1 && x === size - hoshiGap - 1 && y === Math.floor(size / 2)) || // middle right
+        (size % 2 === 1 && x === Math.floor(size / 2) && y === size - hoshiGap - 1) || // bottom middle
+        (size % 2 === 1 && x === Math.floor(size / 2) && y === hoshiGap) || // bottom middle
+        (size % 2 === 1 && x === Math.floor(size / 2) && y === Math.floor(size / 2)) // middle middle
+      ) {
+        intersection.hoshi = true
+      }
+
+      result.push(intersection)
     }
 
     return result

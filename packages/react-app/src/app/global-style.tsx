@@ -17,13 +17,13 @@ const GlobalStyle = createGlobalStyle<{ theme: ITheme }>`
 }
 
 body {
-  font-family: 'ShortStack', sans-serif;
+  font-family: 'Roboto', sans-serif;
   font-size: 16px;
 }
 
 h1, h2, h3, h4, h5, h6, p {
   color: ${({ theme }) => theme.palette.primary.main};
-  font-family: 'ShortStack', sans-serif;
+  font-family: 'Roboto', sans-serif;
   letter-spacing: normal;
   line-height: normal;
   margin: 0;
@@ -35,7 +35,7 @@ p.error {
 
 a {
   cursor: pointer;
-  font-family: 'ShortStack', sans-serif;
+  font-family: 'Roboto', sans-serif;
   text-decoration: none;
 
   &:hover {
@@ -48,7 +48,7 @@ button {
   border: none;
   color: ${({ theme }) => theme.palette.primary.main};
   cursor: pointer;
-  font-family: 'ShortStack', sans-serif;
+  font-family: 'Roboto', sans-serif;
   outline:none;
   padding: 0;
 

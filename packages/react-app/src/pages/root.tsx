@@ -6,12 +6,18 @@ import Board from '../components/board'
 import { useGame } from '../hooks/use-game'
 
 export default function Root() {
-  const { board } = useGame()
+  const { board, playingColor, lastPlayedIndex, setPlayingColor, setLastPlayedIndex } = useGame()
 
   return (
     <Layout>
       <Container>
-        <Board board={board} />
+        <Board
+          board={board}
+          lastPlayedIndex={lastPlayedIndex}
+          playingColor={playingColor}
+          setLastPlayedIndex={setLastPlayedIndex}
+          setPlayingColor={setPlayingColor}
+        />
       </Container>
     </Layout>
   )
