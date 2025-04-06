@@ -7,12 +7,11 @@ export enum StoneColor {
   WHITE = 'WHITE',
 }
 
-export const BOARD_SIZE = 19
+export const BOARD_SIZE = 9
 
 export function useGame() {
   const board = useBoard(BOARD_SIZE)
   const [playingColor, setPlayingColor] = useState<StoneColor>(StoneColor.BLACK)
-  const [lastPlayedIndex, setLastPlayedIndex] = useState<number>(-1)
 
-  return { board, playingColor, lastPlayedIndex, setPlayingColor, setLastPlayedIndex }
+  return { board, playingColor, setPlayingColor }
 }

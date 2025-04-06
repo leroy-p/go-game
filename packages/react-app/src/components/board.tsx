@@ -7,12 +7,10 @@ import { intToAlpha } from '../utils/utils'
 interface IProps {
   board: ReturnType<typeof useBoard>
   playingColor: StoneColor
-  lastPlayedIndex: number
   setPlayingColor: (value: StoneColor) => void
-  setLastPlayedIndex: (value: number) => void
 }
 
-export default function Board({ board, playingColor, lastPlayedIndex, setPlayingColor, setLastPlayedIndex }: IProps) {
+export default function Board({ board, playingColor, setPlayingColor }: IProps) {
   if (BOARD_SIZE <= 0) return <></>
 
   function onIntersectionClick(index: number) {
@@ -20,7 +18,7 @@ export default function Board({ board, playingColor, lastPlayedIndex, setPlaying
 
     board.addStone(index, playingColor)
     setPlayingColor(playingColor === StoneColor.BLACK ? StoneColor.WHITE : StoneColor.BLACK)
-    setLastPlayedIndex(index)
+    board.setLastPlayedIndex(index)
   }
 
   return (
@@ -43,7 +41,7 @@ export default function Board({ board, playingColor, lastPlayedIndex, setPlaying
             )}
             {intersection.stone && (
               <Stone className="stone" color={intersection.stone}>
-                {index === lastPlayedIndex && <div />}
+                {index === board.lastPlayedIndex && <div />}
               </Stone>
             )}
             {!intersection.stone && !intersection.ko && <PreviewStone className="preview-stone" color={playingColor} />}
@@ -52,29 +50,33 @@ export default function Board({ board, playingColor, lastPlayedIndex, setPlaying
       </div>
       <div className="x-container top">
         {Array.from({ length: BOARD_SIZE }).map((_, index) => (
-          <div>
-            <p>{intToAlpha(index)}</p>
+          <div key={index}>
+            {/* <p>{intToAlpha(index)}</p> */}
+            <p>{index}</p>
           </div>
         ))}
       </div>
       <div className="x-container bottom">
         {Array.from({ length: BOARD_SIZE }).map((_, index) => (
-          <div>
-            <p>{intToAlpha(index)}</p>
+          <div key={index}>
+            {/* <p>{intToAlpha(index)}</p> */}
+            <p>{index}</p>
           </div>
         ))}
       </div>
       <div className="y-container left">
         {Array.from({ length: BOARD_SIZE }).map((_, index) => (
-          <div>
-            <p>{BOARD_SIZE - index}</p>
+          <div key={index}>
+            {/* <p>{BOARD_SIZE - index}</p> */}
+            <p>{BOARD_SIZE - 1 - index}</p>
           </div>
         ))}
       </div>
       <div className="y-container right">
         {Array.from({ length: BOARD_SIZE }).map((_, index) => (
-          <div>
-            <p>{BOARD_SIZE - index}</p>
+          <div key={index}>
+            {/* <p>{BOARD_SIZE - index}</p> */}
+            <p>{BOARD_SIZE - 1 - index}</p>
           </div>
         ))}
       </div>
