@@ -1,35 +1,28 @@
 import styled from 'styled-components'
 
-import { BOARD_SIZE, StoneColor } from '../hooks/use-game'
-import { useBoard } from '../hooks/use-board'
+import { BOARD_SIZE, useBoard } from '../hooks/use-board'
 import { intToAlpha } from '../utils/utils'
+import { IIntersection, StoneColor } from '../classes/board'
 
 interface IProps {
-  board: ReturnType<typeof useBoard>
+  intersections: IIntersection[]
   playingColor: StoneColor
-  setPlayingColor: (value: StoneColor) => void
+  lastPlayedIndex: number
+  addStone: (index: number) => void
 }
 
-export default function Board({ board, playingColor, setPlayingColor }: IProps) {
+export default function Board({ intersections, playingColor, lastPlayedIndex, addStone }: IProps) {
   if (BOARD_SIZE <= 0) return <></>
-
-  function onIntersectionClick(index: number) {
-    if (board.intersections[index]?.stone || board.intersections[index]?.ko) return
-
-    board.addStone(index, playingColor)
-    setPlayingColor(playingColor === StoneColor.BLACK ? StoneColor.WHITE : StoneColor.BLACK)
-    board.setLastPlayedIndex(index)
-  }
 
   return (
     <Container>
       <div className="main-container">
-        {board.intersections.map((intersection, index) => (
+        {intersections.map((intersection, index) => (
           <IntersectionContainer
             index={index}
             key={index}
-            onClick={() => onIntersectionClick(index)}
-            unclickable={Boolean(intersection.stone || intersection.ko)}
+            onClick={() => addStone(index)}
+            unclickable={Boolean(intersection.stone || intersection.forbidden === playingColor)}
           >
             <div className="vertical-line" />
             <div className="horizontal-line" />
@@ -41,42 +34,40 @@ export default function Board({ board, playingColor, setPlayingColor }: IProps) 
             )}
             {intersection.stone && (
               <Stone className="stone" color={intersection.stone}>
-                {index === board.lastPlayedIndex && <div />}
+                {index === lastPlayedIndex && <div />}
               </Stone>
             )}
-            {!intersection.stone && !intersection.ko && <PreviewStone className="preview-stone" color={playingColor} />}
+            {!intersection.stone && intersection.forbidden !== playingColor && (
+              <PreviewStone className="preview-stone" color={playingColor} />
+            )}
           </IntersectionContainer>
         ))}
       </div>
       <div className="x-container top">
         {Array.from({ length: BOARD_SIZE }).map((_, index) => (
           <div key={index}>
-            {/* <p>{intToAlpha(index)}</p> */}
-            <p>{index}</p>
+            <p>{intToAlpha(index)}</p>
           </div>
         ))}
       </div>
       <div className="x-container bottom">
         {Array.from({ length: BOARD_SIZE }).map((_, index) => (
           <div key={index}>
-            {/* <p>{intToAlpha(index)}</p> */}
-            <p>{index}</p>
+            <p>{intToAlpha(index)}</p>
           </div>
         ))}
       </div>
       <div className="y-container left">
         {Array.from({ length: BOARD_SIZE }).map((_, index) => (
           <div key={index}>
-            {/* <p>{BOARD_SIZE - index}</p> */}
-            <p>{BOARD_SIZE - 1 - index}</p>
+            <p>{BOARD_SIZE - index}</p>
           </div>
         ))}
       </div>
       <div className="y-container right">
         {Array.from({ length: BOARD_SIZE }).map((_, index) => (
           <div key={index}>
-            {/* <p>{BOARD_SIZE - index}</p> */}
-            <p>{BOARD_SIZE - 1 - index}</p>
+            <p>{BOARD_SIZE - index}</p>
           </div>
         ))}
       </div>
@@ -182,6 +173,7 @@ const IntersectionContainer = styled.div<{ index: number; unclickable: boolean }
   height: calc(100% / ${BOARD_SIZE});
   justify-content: center;
   padding: 1px;
+  pointer-events: ${({ unclickable }) => (unclickable ? 'none' : 'auto')};
   position: relative;
   width: calc(100% / ${BOARD_SIZE});
 
@@ -228,9 +220,9 @@ const IntersectionContainer = styled.div<{ index: number; unclickable: boolean }
     width: 100%;
 
     & > div {
-      border: solid 2px #000000;
-      height: 60%;
-      width: 60%;
+      border: solid 4px #000000;
+      height: 80%;
+      width: 80%;
     }
   }
 `
